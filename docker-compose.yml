@@ -1,0 +1,45 @@
+version: "3"
+
+networks:
+  monitor-net:
+    driver: bridge
+
+services:
+
+  json_exporter:
+    build:
+      context: ./json_exporter/
+    container_name: json_exporter
+    restart: unless-stopped
+    networks:
+      - monitor-net
+    ports:
+      - 5000:5000
+    volumes:
+      - ./json_exporter/json:/root/json
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command: --config.file=/etc/prometheus/prometheus.yml
+    restart: unless-stopped
+    networks:
+      - monitor-net
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    networks:
+      - monitor-net
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
